@@ -44,3 +44,9 @@ Can Buy ETH: 0.088147264047
 Expected BTC Profit: $7.6878128193
 Expected ETH Profit: $4.66737739918
 ```
+
+## Run as a daemon
+
+`$ ./arb.php daemon`
+
+Runs the script as a daemon, checking every 10 minutes.

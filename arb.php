@@ -35,11 +35,11 @@ class Arb {
         /** @var Coinbase\Wallet\Resource\PaymentMethod $paymentMethod */
         $paymentMethod = $paymentMethods->get(0);
         $limits = $paymentMethod->getLimits();
-        $remaining = floatval($limits['buy'][0]['remaining']['amount']);
+        $buyAmount = floatval($limits['buy'][0]['remaining']['amount']);
 
-        echo 'Coinbase Buy Limit: $' . sprintf('%02.2f', $remaining) . PHP_EOL;
+        echo 'Coinbase Buy Limit: $' . sprintf('%02.2f', $buyAmount) . PHP_EOL;
 
-        $buyAmountAfterFee = $remaining - (($remaining / 100) * 3.99);
+        $buyAmountAfterFee = $buyAmount - (($buyAmount / 100) * 3.99);
 
         echo 'Coinbase Buy Amount after Fee: $' . $buyAmountAfterFee . PHP_EOL;
 
@@ -110,7 +110,8 @@ class Arb {
         echo 'Expected BTC Profit: $' . $btcExpectedProfit . PHP_EOL;
         echo 'Expected ETH Profit: $' . $ethExpectedProfit . PHP_EOL;
 
-        $notification = 'BTC: ' . round($btcVariancePct, 2) . '%  $' . $btcExpectedProfit . '\n';
+        $notification = 'Can buy: $' . round($buyAmount, 2) . '\n';
+        $notification .= 'BTC: ' . round($btcVariancePct, 2) . '%  $' . $btcExpectedProfit . '\n';
         $notification .= 'ETH: ' . round($ethVariancePct, 2) . '%  $' . $ethExpectedProfit;
 
         exec('osascript -e \'display notification "' . $notification . '" with title "Arb"\'');

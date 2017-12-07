@@ -110,11 +110,11 @@ class Arb {
         echo 'Expected BTC Profit: $' . $btcExpectedProfit . PHP_EOL;
         echo 'Expected ETH Profit: $' . $ethExpectedProfit . PHP_EOL;
 
-        $notification = 'Can buy: $' . round($buyAmount, 2) . '\n';
-        $notification .= 'BTC: ' . round($btcVariancePct, 2) . '%  $' . $btcExpectedProfit . '\n';
+        $title = 'ARB: Can buy $' . round($buyAmount, 2) . '\n';
+        $notification = 'BTC: ' . round($btcVariancePct, 2) . '%  $' . $btcExpectedProfit . '\n';
         $notification .= 'ETH: ' . round($ethVariancePct, 2) . '%  $' . $ethExpectedProfit;
 
-        exec('osascript -e \'display notification "' . $notification . '" with title "Arb"\'');
+        exec('osascript -e \'display notification "' . $notification . '" with title "' . $title . '"\'');
     }
 }
 

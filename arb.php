@@ -115,6 +115,39 @@ class Arb {
         $notification .= 'ETH: ' . round($ethVariancePct, 2) . '%  $' . $ethExpectedProfit;
 
         exec('osascript -e \'display notification "' . $notification . '" with title "' . $title . '"\'');
+
+        if (getenv('PUSH_ENABLED') && getenv('PUSHED_APP_KEY') && getenv('PUSHED_APP_SECRET')) {
+            $this->sendPushNotification(round($btcVariancePct, 2), round($ethVariancePct, 2));
+        }
+    }
+
+    /**
+     * Send a push if the variance is high
+     *
+     * @param $btcVariancePct
+     * @param $ethVariancePct
+     */
+    public function sendPushNotification($btcVariancePct, $ethVariancePct)
+    {
+        // Don't send a push if the variance is below 14%
+        if ($btcVariancePct < 14 || $ethVariancePct < 14) {
+            return;
+        }
+
+        curl_setopt_array($ch = curl_init(), array(
+            CURLOPT_URL => "https://api.pushed.co/1/push",
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => array(
+                "app_key" => getenv('PUSHED_APP_KEY'),
+                "app_secret" => getenv('PUSHED_APP_SECRET'),
+                "target_type" => "app",
+                "content" => "BTC: $btcVariancePct%  ETH: $ethVariancePct"
+            ),
+            CURLOPT_SAFE_UPLOAD => true,
+            CURLOPT_RETURNTRANSFER => true
+        ));
+        curl_exec($ch);
+        curl_close($ch);
     }
 }
 

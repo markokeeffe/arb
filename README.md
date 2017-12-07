@@ -2,6 +2,7 @@
 
 ## Installation
 
+- Composer install: `$ composer install`
 - Copy `/.env.example` to `/.env`.
 - Get a Coinbase API key and secret, requires `wallet:payment-methods:read` and `wallet:payment-methods:limits` permissions.
 - Put the values in the `/.env` file.

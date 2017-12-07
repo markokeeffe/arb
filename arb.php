@@ -111,7 +111,7 @@ class Arb {
         echo 'Expected ETH Profit: $' . $ethExpectedProfit . PHP_EOL;
 
         $notification = 'BTC: ' . round($btcVariancePct, 2) . '%  $' . $btcExpectedProfit . '\n';
-        $notification .= 'ETH: ' . round($ethVariancePct, 2) . '%  $' . $ethExpectedProfit . '\n';
+        $notification .= 'ETH: ' . round($ethVariancePct, 2) . '%  $' . $ethExpectedProfit;
 
         exec('osascript -e \'display notification "' . $notification . '" with title "Arb"\'');
     }

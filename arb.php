@@ -51,7 +51,8 @@ $coinbasePrices = [
     'ETH' => floatval($ethPrice->getAmount()),
 ];
 
-var_dump($coinbasePrices);
+echo '    BTC: $' . $coinbasePrices['BTC'].PHP_EOL;
+echo '    ETH: $' . $coinbasePrices['ETH'].PHP_EOL;
 echo PHP_EOL;
 
 echo 'Getting BTCMarkets BTC price...' . PHP_EOL;
@@ -67,7 +68,8 @@ $btcMarketsPrices = [
     'ETH' => $ethPrice['lastPrice'],
 ];
 
-var_dump($btcMarketsPrices);
+echo '    BTC: $' . $btcMarketsPrices['BTC'].PHP_EOL;
+echo '    ETH: $' . $btcMarketsPrices['ETH'].PHP_EOL;
 echo PHP_EOL;
 
 echo 'Calculating variances...' . PHP_EOL;
@@ -75,10 +77,10 @@ echo 'Calculating variances...' . PHP_EOL;
 $btcVariancePct = (((100 / $coinbasePrices['BTC']) * $btcMarketsPrices['BTC']) - 100);
 $ethVariancePct = (((100 / $coinbasePrices['ETH']) * $btcMarketsPrices['ETH']) - 100);
 
-echo 'BTC: ' . $btcVariancePct . '%' . PHP_EOL;
-echo 'ETH: ' . $ethVariancePct . '%' . PHP_EOL;
+echo '    BTC: ' . $btcVariancePct . '%' . PHP_EOL;
+echo '    ETH: ' . $ethVariancePct . '%' . PHP_EOL;
 
-echo PHP_EOL.PHP_EOL;
+echo PHP_EOL;
 
 $buyBtc = $buyAmountAfterFee / $coinbasePrices['BTC'];
 
@@ -94,7 +96,7 @@ $expectedEth = ($buyEth / 100 * (100 + $ethVariancePct)) - $buyEth;
 $expectedBtcProfit = $expectedBtc * $btcMarketsPrices['BTC'];
 $expectedEthProfit = $expectedEth * $btcMarketsPrices['ETH'];
 
-echo PHP_EOL.PHP_EOL;
+echo PHP_EOL;
 
 echo 'Expected BTC Profit: $' . $expectedBtcProfit . PHP_EOL;
 echo 'Expected ETH Profit: $' . $expectedEthProfit . PHP_EOL;

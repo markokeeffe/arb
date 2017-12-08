@@ -1,0 +1,12 @@
+{
+    "type": "service_account",
+    "project_id": "hybrid-bastion-188322",
+    "private_key_id": "681dd876b3acc56e7e3789a89e8d63cb5bc0711a",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDb95qBmmQdFKpJ\nFS3edOoQioP7LtaNh5pEZr/is23pAVhIQkWyEqWr0K2AzeUwE/G/9xyX8PZQ+Yxm\nzrkBvreYhILcS0aWZ5q9R0CEpqRpNT9MVYt4ZFEZoQZMuZGg/ocE0GZFpEAKPQvm\nuYtE953LzyRr2Ot9fP8VYF4AqTh31bYv7lx3rBjfzGEgBj8rcqAWpgCzVBvesdjk\n5VzX66BMh7/12uUpZki3+K1mCYFMXWwfb6R7LkDNNFe8Ghwx5o2C+I/yN9Z+YPqU\nQXEZSeGUuWe2GGsHe/CH3B1VetdJFcQXXYqpd/bHCpMFckikkTSvpi1iLB6hU+H/\nKG5ynhS/AgMBAAECggEAAfxA7WOxiVZTJcSuD5wjkwKMQ1UdzfK6JyXWis/MO5/A\npmu5iG7lnThvW3IiLtXMlP/oqK39H2QJ2WL0htHtS/XedVLuS9PDCMXTlFvKI87g\ntOZtgb9PiYg4kIWFjWS1oCaG/Xiclp2UJVKXBvbPf3Qp48RJCChYiNwphiPxzkls\naXiSGnE+2nHvDDY1ORI3Hc53W9UqpLRUe4MrzJ+W4Tdajv0owL0iGjtj3XQPMoH0\nJ+A+AjaMUhyorWorqQ32Zxf/QKFT0NGDdU6UZEM2SLHFoik4vbK+hdG+gjYIz7TR\n8GMBFBqVh4KiTFGt8edCRbgRHLb1SRhuyoJqp2e5WQKBgQD+59K4RXLNiShmq7xA\ncgDJHq3I1kjA5VrqfGc7a8rQqKXeAGEllyhkRAkPlsbmlitiXqIL1Avd+U1gksnm\nijYjOsypMGqS/itbfFdRphHlt3HUhnGsUmgjtMjL3/9/VxVLQupyReaWzQFzM1Oe\nLoQPn/KjOGPNReS4KZIodMPRpwKBgQDc6WDWcKpNEmu3IbDSdsSANicf/HPg9IOc\nDE6VqsO12Kybk5xFRxR+lh/4RzmQtAaMi2LAwFnpdujCER0Q8enalyNytAY05aO9\nDwNrG2QPm/blqRAtu+o4jCLc0Dqbct8++OVYDgF4zLjbo7YZFzI9z8uaQPg5pCUe\nEFjjL6iXKQKBgQCXs6nRpusy7UzRBaXMiMx05UAxxW2Y9yaLZKwfTgBu+99y5rDq\nKTKNsXve/jGza224Zm90MKc7XLIzJkjoXhroDodcrYbPolp1YOOqoPYHy4wAGl8u\nWgDGN0JFKzMoOtBecR2MEpOv7aPORp6eBjrr/Znuj5G9ybnb7EmisBMWAwKBgFN2\n1YCPtrhB4nKhhwYtm1Z5n1SldD6lA2ic+b/wcdstzyFEpwFBtsuQ+uk6N9SlP+gv\n7ZK32gCsTYqtHpc9X0aYXetDeyjXLoMKvhbklWyUV7czpgoxem/8+lsFTW9X+mL3\ndOdM+19hseJCO1XFftT9woY4T9CvZNq0AHFtmzvpAoGBALpUJGdjQWO0zWVnaUDv\ntD0ToGnavrwvGJ6HAP/p3Y0HNZ2WKP/yAhMbow4PDZ9magUSVAOA0n4YpMrAuaAm\nSJYRJtYhFugvCkud/Hg7P5+lcZGHfQpvYPE+XwJaXYTuRqOmiHhQNVNj/lfxtIEh\nXx2MHI8/BfTuIdSYigdGIKqS\n-----END PRIVATE KEY-----\n",
+    "client_email": "myserviceaccount@hybrid-bastion-188322.iam.gserviceaccount.com",
+    "client_id": "114765836370113942537",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://accounts.google.com/o/oauth2/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/myserviceaccount%40hybrid-bastion-188322.iam.gserviceaccount.com"
+}

@@ -1,7 +1,8 @@
 {
     "require": {
         "coinbase/coinbase": "^2.5",
-        "vlucas/phpdotenv": "^2.4"
+        "vlucas/phpdotenv": "^2.4",
+        "google/apiclient": "^2.2"
     },
     "autoload": {
         "files": ["src/BtcMarkets/BtcMarkets.php"]

@@ -11,6 +11,7 @@ if (php_sapi_name() != 'cli') {
     throw new Exception('This application must be run on the command line.');
 }
 set_time_limit(0);
+date_default_timezone_set('Australia/Brisbane');
 
 $dotenv = new Dotenv\Dotenv(__DIR__);
 $dotenv->load();
@@ -37,7 +38,7 @@ class Arb {
         $google->setScopes([Google_Service_Sheets::SPREADSHEETS]);
         $google->setAccessType('offline');
 
-        $jsonAuth = getenv('GOOGLE_JSON_AUTH');
+        $jsonAuth = __DIR__ . '/' . getenv('GOOGLE_JSON_AUTH');
         $google->setAuthConfigFile($jsonAuth);
 
         $this->googleSheets = new Google_Service_Sheets($google);

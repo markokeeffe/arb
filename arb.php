@@ -10,6 +10,7 @@ use Coinbase\Wallet\Configuration;
 if (php_sapi_name() != 'cli') {
     throw new Exception('This application must be run on the command line.');
 }
+set_time_limit(0);
 
 $dotenv = new Dotenv\Dotenv(__DIR__);
 $dotenv->load();
@@ -141,20 +142,22 @@ class Arb {
         $ethExpected = ($buyEth / 100 * (100 + $variances['ETH'])) - $buyEth;
         $ltcExpected = ($buyLtc / 100 * (100 + $variances['LTC'])) - $buyLtc;
 
-        $btcExpectedProfit = round($btcExpected * $btcMarketsPrices['BTC'], 2);
-        $ethExpectedProfit = round($ethExpected * $btcMarketsPrices['ETH'], 2);
-        $ltcExpectedProfit = round($ltcExpected * $btcMarketsPrices['LTC'], 2);
+        $profits = [
+            'BTC' => round($btcExpected * $btcMarketsPrices['BTC'], 2),
+            'ETH' => round($ethExpected * $btcMarketsPrices['ETH'], 2),
+            'LTC' => round($ltcExpected * $btcMarketsPrices['LTC'], 2),
+        ];
 
-        $maxProfit = max([$btcExpectedProfit, $ethExpectedProfit, $ltcExpectedProfit]);
+        $maxProfit = max($profits);
 
         echo PHP_EOL;
 
-        echo 'Expected BTC Profit: $' . $btcExpectedProfit . PHP_EOL;
-        echo 'Expected ETH Profit: $' . $ethExpectedProfit . PHP_EOL;
-        echo 'Expected LTC Profit: $' . $ltcExpectedProfit . PHP_EOL;
+        echo 'Expected BTC Profit: $' . $profits['BTC'] . PHP_EOL;
+        echo 'Expected ETH Profit: $' . $profits['ETH'] . PHP_EOL;
+        echo 'Expected LTC Profit: $' . $profits['LTC'] . PHP_EOL;
 
         $title = 'ARB: Can buy $' . round($this->buyAmount, 2) . '\n';
-        $subtitle = 'Max Profit: $' . $maxProfit;
+        $subtitle = 'Max Profit: $' . $maxProfit . ' (' . array_search($maxProfit, $profits) . ')';
         $notification = 'BTC: ' . round($variances['BTC'], 2) . '%  ';
         $notification .= 'ETH: ' . round($variances['ETH'], 2) . '%  ';
         $notification .= 'LTC: ' . round($variances['LTC'], 2) . '%';
@@ -216,9 +219,12 @@ class Arb {
             $btcMarketsPrices['BTC'],
             $btcMarketsPrices['ETH'],
             $btcMarketsPrices['LTC'],
+            round($variances['BTC'], 2),
+            round($variances['ETH'], 2),
+            round($variances['LTC'], 2),
         ]]);
 
-        $response = $this->googleSheets->spreadsheets_values->append($spreadsheetId, $range, $newRow, [
+        $this->googleSheets->spreadsheets_values->append($spreadsheetId, $range, $newRow, [
             'valueInputOption' => 'USER_ENTERED',
             'insertDataOption' => 'INSERT_ROWS',
         ]);

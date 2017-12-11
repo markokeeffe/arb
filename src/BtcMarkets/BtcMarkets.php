@@ -1,5 +1,5 @@
 <?php
-namespace BtcMarkets;
+namespace App\BtcMarkets;
 /*
 | BTCMarkets
 | Exchange is in AUD.
@@ -8,9 +8,10 @@ namespace BtcMarkets;
 |
 */
 class BtcMarkets {
-    private $key;
-    private $secret;
-    private $url;
+    protected $key;
+    protected $secret;
+    protected $url;
+
     function __construct($key, $secret)
     {
         $this->key = $key;
@@ -36,7 +37,7 @@ class BtcMarkets {
         }
     }
 
-    private function request($method, $data = [])
+    protected function request($method, $data = [])
     {
         $data = json_encode($data);
         $nonce = floor(microtime(true) * 1000); // API requires timestamp in milliseconds
@@ -53,19 +54,17 @@ class BtcMarkets {
             "signature: " . $signed,
             "timestamp: " . $nonce,
         ];
-        // our curl handle (initialize if required)
-        static $ch = null;
-        if (is_null($ch)) {
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; BTC Markets Client; '.php_uname('s').'; PHP/'.phpversion().')');
-        }
 
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; BTC Markets Client; '.php_uname('s').'; PHP/'.phpversion().')');
         curl_setopt($ch, CURLOPT_URL, $this->url . $method);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
         $response = curl_exec($ch);
+
+        curl_close($ch);
 
         if ($response === false)  {
             return false;
@@ -79,7 +78,7 @@ class BtcMarkets {
         return $result;
     }
 
-    private function getRequest($method)
+    protected function getRequest($method)
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -88,6 +87,8 @@ class BtcMarkets {
         curl_setopt($ch, CURLOPT_URL, $this->url . $method);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
         $response = curl_exec($ch);
+
+        curl_close($ch);
 
         if ($response === false)  {
             return false;

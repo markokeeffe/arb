@@ -3,7 +3,8 @@
 
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 
-use BtcMarkets\BtcMarkets;
+use App\BtcMarkets\BtcMarkets;
+use App\CryptoCompare\CryptoCompare;
 use Coinbase\Wallet\Client;
 use Coinbase\Wallet\Configuration;
 
@@ -20,6 +21,7 @@ class Arb {
 
     protected $btcMarkets;
     protected $coinbase;
+    protected $cryptoCompare;
     protected $googleSheets;
     protected $buyAmount;
 
@@ -32,6 +34,8 @@ class Arb {
         $coinbaseApiKey = getenv('COINBASE_API_KEY');
         $coinbaseApiSecret = getenv('COINBASE_API_SECRET');
         $this->coinbase = Client::create(Configuration::apiKey($coinbaseApiKey, $coinbaseApiSecret));
+
+        $this->cryptoCompare = new CryptoCompare();
 
         $google = new Google_Client();
         $google->setApplicationName(getenv('GOOGLE_API_APP_NAME'));
@@ -46,6 +50,38 @@ class Arb {
 
     public function get()
     {
+        echo '=========================================' . PHP_EOL;
+        echo '           ' . date('Y-m-d H:i:s') . PHP_EOL;
+        echo '=========================================' . PHP_EOL;
+
+        echo 'Getting base prices from CryptoCompare...' . PHP_EOL;
+
+        $currencies = ['AUD', 'USD', 'GBP'];
+
+        $basePrices = [
+            'BTC' => $this->cryptoCompare->prices('BTC', $currencies),
+            'ETH' => $this->cryptoCompare->prices('ETH', $currencies),
+            'LTC' => $this->cryptoCompare->prices('LTC', $currencies),
+        ];
+
+        echo '    BTC: ';
+        echo 'AUD$' . $basePrices['BTC']['AUD'] . ' ';
+        echo 'USD$' . $basePrices['BTC']['USD'] . ' ';
+        echo 'GBP£' . $basePrices['BTC']['GBP'] . ' ';
+        echo PHP_EOL;
+
+        echo '    ETH: ';
+        echo 'AUD$' . $basePrices['ETH']['AUD'] . ' ';
+        echo 'USD$' . $basePrices['ETH']['USD'] . ' ';
+        echo 'GBP£' . $basePrices['ETH']['GBP'] . ' ';
+        echo PHP_EOL;
+
+        echo '    LTC: ';
+        echo 'AUD$' . $basePrices['LTC']['AUD'] . ' ';
+        echo 'USD$' . $basePrices['LTC']['USD'] . ' ';
+        echo 'GBP£' . $basePrices['LTC']['GBP'] . ' ';
+        echo PHP_EOL;
+
         /** @var Coinbase\Wallet\Resource\ResourceCollection $paymentMethods */
         $paymentMethods = $this->coinbase->getPaymentMethods();
 
@@ -62,7 +98,7 @@ class Arb {
 
         echo 'Coinbase Buy Amount after Fee: $' . $buyAmountAfterFee . PHP_EOL;
 
-        echo PHP_EOL.PHP_EOL;
+        echo PHP_EOL;
 
         echo 'Getting Coinbase BTC price...' . PHP_EOL;
 
@@ -121,6 +157,8 @@ class Arb {
             'LTC' => (((100 / $coinbasePrices['LTC']) * $btcMarketsPrices['LTC']) - 100),
         ];
 
+        $maxVariance = max($variances);
+
         echo '    BTC: ' . $variances['BTC'] . '%' . PHP_EOL;
         echo '    ETH: ' . $variances['ETH'] . '%' . PHP_EOL;
         echo '    LTC: ' . $variances['LTC'] . '%' . PHP_EOL;
@@ -157,39 +195,34 @@ class Arb {
         echo 'Expected ETH Profit: $' . $profits['ETH'] . PHP_EOL;
         echo 'Expected LTC Profit: $' . $profits['LTC'] . PHP_EOL;
 
-        $title = 'ARB: Can buy $' . round($this->buyAmount, 2) . '\n';
-        $subtitle = 'Max Profit: $' . $maxProfit . ' (' . array_search($maxProfit, $profits) . ')';
-        $notification = 'BTC: ' . round($variances['BTC'], 2) . '%  ';
-        $notification .= 'ETH: ' . round($variances['ETH'], 2) . '%  ';
-        $notification .= 'LTC: ' . round($variances['LTC'], 2) . '%';
+        echo '=========================================' . PHP_EOL . PHP_EOL;
 
-        exec('osascript -e \'display notification "' . $notification . '" with title "' . $title . '" subtitle "' . $subtitle . '"\'');
+        // Show an OSX notification if enabled
+        if (getenv('NOTIFICATION_ENABLED') && getenv('NOTIFICATION_THRESHOLD') < $maxVariance) {
+            $title = 'ARB: Can buy $' . round($this->buyAmount, 2) . '\n';
+            $subtitle = 'Max Profit: $' . $maxProfit . ' (' . array_search($maxProfit, $profits) . ')';
+            $notification = 'Max Variance: ' . $maxVariance . ' (' . array_search($maxVariance, $variances) . ')';
 
-        if (getenv('PUSH_ENABLED') && getenv('PUSHED_APP_KEY') && getenv('PUSHED_APP_SECRET')) {
-            $this->sendPushNotification(round($variances['BTC'], 2), round($variances['ETH'], 2), round($variances['LTC'], 2));
+            exec('osascript -e \'display notification "' . $notification . '" with title "' . $title . '" subtitle "' . $subtitle . '"\'');
         }
 
+        // Send a push if the variance is high
+        if (getenv('PUSH_ENABLED') && getenv('PUSH_THRESHOLD') < $maxVariance && getenv('PUSHED_APP_KEY') && getenv('PUSHED_APP_SECRET')) {
+            $this->sendPushNotification($variances);
+        }
+
+        // Append data to a google sheet if enabled
         if (getenv('APPEND_TO_GOOGLE_SHEET') && getenv('GOOGLE_SHEET_ID')) {
-            $this->appendToGoogleSheet($coinbasePrices, $btcMarketsPrices, $variances);
+            $this->appendToGoogleSheet($basePrices, $coinbasePrices, $btcMarketsPrices, $variances);
         }
     }
 
     /**
-     * Send a push if the variance is high
-     *
-     * @param $btcVariancePct
-     * @param $ethVariancePct
-     * @param $ltcVariancePct
+     * Send a push notification using "Pushed"
+     * @param array $variances
      */
-    protected function sendPushNotification($btcVariancePct, $ethVariancePct, $ltcVariancePct)
+    protected function sendPushNotification(array $variances)
     {
-        $highVariance = 13;
-
-        // Don't send a push if the variance is below 14%
-        if ($btcVariancePct < $highVariance || $ethVariancePct < $highVariance || $ltcVariancePct < $highVariance) {
-            return;
-        }
-
         curl_setopt_array($ch = curl_init(), array(
             CURLOPT_URL => "https://api.pushed.co/1/push",
             CURLOPT_CUSTOMREQUEST => "POST",
@@ -197,7 +230,7 @@ class Arb {
                 "app_key" => getenv('PUSHED_APP_KEY'),
                 "app_secret" => getenv('PUSHED_APP_SECRET'),
                 "target_type" => "app",
-                "content" => "BTC: $btcVariancePct%  ETH: $ethVariancePct%  LTC: $ltcVariancePct%",
+                "content" => 'BTC: ' . round($variances['BTC'], 2) . '%  ETH: ' . round($variances['ETH'], 2) . '%  LTC: ' . round($variances['LTC'], 2) . '%',
             ),
             CURLOPT_SAFE_UPLOAD => true,
             CURLOPT_RETURNTRANSFER => true
@@ -206,7 +239,14 @@ class Arb {
         curl_close($ch);
     }
 
-    protected function appendToGoogleSheet($coinbasePrices, $btcMarketsPrices, $variances)
+    /**
+     * Append a row of prices to a google sheet using the Google Sheets API
+     * @param $basePrices
+     * @param $coinbasePrices
+     * @param $btcMarketsPrices
+     * @param $variances
+     */
+    protected function appendToGoogleSheet($basePrices, $coinbasePrices, $btcMarketsPrices, $variances)
     {
         $spreadsheetId = getenv('GOOGLE_SHEET_ID');
         $range = 'A2:G2';
@@ -223,6 +263,15 @@ class Arb {
             round($variances['BTC'], 2),
             round($variances['ETH'], 2),
             round($variances['LTC'], 2),
+            $basePrices['BTC']['AUD'],
+            $basePrices['BTC']['USD'],
+            $basePrices['BTC']['GBP'],
+            $basePrices['ETH']['AUD'],
+            $basePrices['ETH']['USD'],
+            $basePrices['ETH']['GBP'],
+            $basePrices['LTC']['AUD'],
+            $basePrices['LTC']['USD'],
+            $basePrices['LTC']['GBP'],
         ]]);
 
         $this->googleSheets->spreadsheets_values->append($spreadsheetId, $range, $newRow, [
@@ -232,16 +281,6 @@ class Arb {
     }
 }
 
+// Run
 $arb = new Arb;
-
-// Has the 'daemon' flag been provided?
-if (isset($argv[1]) && $argv[1] == 'daemon') {
-    // Recalculate every 10 minutes
-    do {
-        $arb->get();
-        sleep(600);
-    } while (1);
-} else {
-    $arb->get();
-}
-
+$arb->get();

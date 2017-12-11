@@ -5,6 +5,8 @@
         "google/apiclient": "^2.2"
     },
     "autoload": {
-        "files": ["src/BtcMarkets/BtcMarkets.php"]
+        "psr-4": {
+            "App\\": "src/"
+        }
     }
 }

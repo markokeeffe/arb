@@ -217,24 +217,31 @@ class Arb {
         }
     }
 
+    public function test()
+    {
+//        $response = $this->btcMarkets->sellAtMarketValue('ETH', 0.00000001);
+        $response = $this->btcMarkets->getOrderHistory('ETH');
+        var_dump($response);
+    }
+
     /**
      * Send a push notification using "Pushed"
      * @param array $variances
      */
     protected function sendPushNotification(array $variances)
     {
-        curl_setopt_array($ch = curl_init(), array(
+        curl_setopt_array($ch = curl_init(), [
             CURLOPT_URL => "https://api.pushed.co/1/push",
             CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => array(
+            CURLOPT_POSTFIELDS => [
                 "app_key" => getenv('PUSHED_APP_KEY'),
                 "app_secret" => getenv('PUSHED_APP_SECRET'),
                 "target_type" => "app",
                 "content" => 'BTC: ' . round($variances['BTC'], 2) . '%  ETH: ' . round($variances['ETH'], 2) . '%  LTC: ' . round($variances['LTC'], 2) . '%',
-            ),
+            ],
             CURLOPT_SAFE_UPLOAD => true,
             CURLOPT_RETURNTRANSFER => true
-        ));
+        ]);
         curl_exec($ch);
         curl_close($ch);
     }
@@ -283,4 +290,9 @@ class Arb {
 
 // Run
 $arb = new Arb;
-$arb->get();
+
+if (isset($argv[1]) && 'test' === $argv[1]) {
+    $arb->test();
+} else {
+    $arb->get();
+}

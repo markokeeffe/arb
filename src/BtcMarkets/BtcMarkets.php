@@ -11,6 +11,7 @@ class BtcMarkets {
     protected $key;
     protected $secret;
     protected $url;
+    protected $numberConverter = 100000000;
 
     function __construct($key, $secret)
     {
@@ -24,17 +25,27 @@ class BtcMarkets {
         return $this->getRequest('/market/' . $coin . '/AUD/tick');
     }
 
-    public function history($count = 10, $since)
+    public function sellAtMarketValue($coin, $volume)
     {
-        $response = $this->request('/order/history', [
+        return $this->request('/order/create', [
             'currency' => 'AUD',
-            'instrument' => 'BTC',
-            'limit' => $count,
-            'since' => $since,
+            'instrument' => $coin,
+            'price' => null,
+            'volume' => 100000000 * $volume,
+            'orderSide' => 'Ask',
+            'ordertype' => 'Market',
+            'clientRequestId' => '1',
         ]);
-        if ($response['success']) {
-            return $response;
-        }
+    }
+
+    public function getOrderHistory($coin)
+    {
+        return $this->request('/order/history', [
+            'currency' => 'AUD',
+            'instrument' => $coin,
+            'limit' => 10,
+            'since' => 979087000,
+        ]);
     }
 
     protected function request($method, $data = [])
@@ -51,8 +62,8 @@ class BtcMarkets {
             "Accept-Charset: UTF-8",
             "Content-Type: application/json",
             "apikey: " . $this->key,
-            "signature: " . $signed,
             "timestamp: " . $nonce,
+            "signature: " . $signed,
         ];
 
         $ch = curl_init();

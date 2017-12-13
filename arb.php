@@ -14,7 +14,7 @@ $dotenv = new Dotenv\Dotenv(__DIR__);
 $dotenv->load();
 
 // Run
-$arb = new Arb;
+$arb = new Arb(dirname(__FILE__) . '/resources');
 
 if (isset($argv[1]) && 'test' === $argv[1]) {
     $arb->test();

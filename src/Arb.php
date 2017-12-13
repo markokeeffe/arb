@@ -13,14 +13,17 @@ use Google_Service_Sheets_ValueRange;
 
 class Arb
 {
+    protected $resourcesDir;
     protected $btcMarkets;
     protected $coinbase;
     protected $cryptoCompare;
     protected $googleSheets;
     protected $buyAmount;
 
-    public function __construct()
+    public function __construct($resourcesDir)
     {
+        $this->resourcesDir = $resourcesDir;
+
         $btcMarketsApiKey = getenv('BTC_MARKETS_API_KEY');
         $btcMarketsApiSecret = getenv('BTC_MARKETS_API_SECRET');
         $this->btcMarkets = new BtcMarkets($btcMarketsApiKey, $btcMarketsApiSecret);
@@ -36,7 +39,7 @@ class Arb
         $google->setScopes([Google_Service_Sheets::SPREADSHEETS]);
         $google->setAccessType('offline');
 
-        $jsonAuth = __DIR__ . '/' . getenv('GOOGLE_JSON_AUTH');
+        $jsonAuth = $this->resourcesDir . '/' . getenv('GOOGLE_JSON_AUTH');
         $google->setAuthConfigFile($jsonAuth);
 
         $this->googleSheets = new Google_Service_Sheets($google);

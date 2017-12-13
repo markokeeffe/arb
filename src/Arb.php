@@ -39,8 +39,13 @@ class Arb
         $google->setScopes([Google_Service_Sheets::SPREADSHEETS]);
         $google->setAccessType('offline');
 
-        $jsonAuth = $this->resourcesDir . '/' . getenv('GOOGLE_JSON_AUTH');
-        $google->setAuthConfigFile($jsonAuth);
+        if (getenv('GOOGLE_JSON_AUTH_FILE')) {
+            $jsonAuth = $this->resourcesDir . '/' . getenv('GOOGLE_JSON_AUTH_FILE');
+        } else {
+            $jsonAuth = getenv('GOOGLE_JSON_AUTH');
+        }
+
+        $google->setAuthConfig($jsonAuth);
 
         $this->googleSheets = new Google_Service_Sheets($google);
     }

@@ -7,6 +7,7 @@
             "email": "senshi001@gmail.com"
         }
     ],
+    "license": "MIT",
     "require": {
         "php": ">=5.4.0",
         "coinbase/coinbase": "^2.5",

@@ -87,6 +87,9 @@ class Arb {
 
         echo 'Getting Coinbase Limits...' . PHP_EOL;
 
+        $coinbaseCreditCardFee = 3.99;
+        $btcMarketsTradingFee = 0.75;
+
         /** @var Coinbase\Wallet\Resource\PaymentMethod $paymentMethod */
         $paymentMethod = $paymentMethods->get(0);
         $limits = $paymentMethod->getLimits();
@@ -94,7 +97,7 @@ class Arb {
 
         echo 'Coinbase Buy Limit: $' . sprintf('%02.2f', $this->buyAmount) . PHP_EOL;
 
-        $buyAmountAfterFee = $this->buyAmount - (($this->buyAmount / 100) * 3.99);
+        $buyAmountAfterFee = $this->buyAmount - (($this->buyAmount / 100) * $coinbaseCreditCardFee);
 
         echo 'Coinbase Buy Amount after Fee: $' . $buyAmountAfterFee . PHP_EOL;
 
@@ -116,9 +119,9 @@ class Arb {
         $ltcPrice = $this->coinbase->getBuyPrice('LTC-AUD');
 
         $coinbasePrices = [
-            'BTC' => floatval($btcPrice->getAmount()),
-            'ETH' => floatval($ethPrice->getAmount()),
-            'LTC' => floatval($ltcPrice->getAmount()),
+            'BTC' => (floatval($btcPrice->getAmount()) / 100) * (100 + $coinbaseCreditCardFee),
+            'ETH' => (floatval($ethPrice->getAmount()) / 100) * (100 + $coinbaseCreditCardFee),
+            'LTC' => (floatval($ltcPrice->getAmount()) / 100) * (100 + $coinbaseCreditCardFee),
         ];
 
         echo '    BTC: $' . $coinbasePrices['BTC'].PHP_EOL;
@@ -139,9 +142,9 @@ class Arb {
         $ltcPrice = $this->btcMarkets->price('LTC');
 
         $btcMarketsPrices = [
-            'BTC' => $btcPrice['lastPrice'],
-            'ETH' => $ethPrice['lastPrice'],
-            'LTC' => $ltcPrice['lastPrice'],
+            'BTC' => ($btcPrice['lastPrice'] / 100) * (100 - $btcMarketsTradingFee),
+            'ETH' => ($ethPrice['lastPrice'] / 100) * (100 - $btcMarketsTradingFee),
+            'LTC' => ($ltcPrice['lastPrice'] / 100) * (100 - $btcMarketsTradingFee),
         ];
 
         echo '    BTC: $' . $btcMarketsPrices['BTC'].PHP_EOL;

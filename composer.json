@@ -7,7 +7,6 @@
             "email": "senshi001@gmail.com"
         }
     ],
-    "minimum-stability": "dev",
     "require": {
         "php": ">=5.4.0",
         "coinbase/coinbase": "^2.5",

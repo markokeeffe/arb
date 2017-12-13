@@ -7,6 +7,9 @@ use Arb\BtcMarkets\BtcMarkets;
 use Arb\CryptoCompare\CryptoCompare;
 use Coinbase\Wallet\Client;
 use Coinbase\Wallet\Configuration;
+use Google_Client;
+use Google_Service_Sheets;
+use Google_Service_Sheets_ValueRange;
 
 class Arb
 {
@@ -73,7 +76,7 @@ class Arb
         echo 'GBP£' . $basePrices['LTC']['GBP'] . ' ';
         echo PHP_EOL;
 
-        /** @var Coinbase\Wallet\Resource\ResourceCollection $paymentMethods */
+        /** @var \Coinbase\Wallet\Resource\ResourceCollection $paymentMethods */
         $paymentMethods = $this->coinbase->getPaymentMethods();
 
         echo 'Getting Coinbase Limits...' . PHP_EOL;
@@ -81,7 +84,7 @@ class Arb
         $coinbaseCreditCardFee = 3.99;
         $btcMarketsTradingFee = 0.75;
 
-        /** @var Coinbase\Wallet\Resource\PaymentMethod $paymentMethod */
+        /** @var \Coinbase\Wallet\Resource\PaymentMethod $paymentMethod */
         $paymentMethod = $paymentMethods->get(0);
         $limits = $paymentMethod->getLimits();
         $this->buyAmount = floatval($limits['buy'][0]['remaining']['amount']);

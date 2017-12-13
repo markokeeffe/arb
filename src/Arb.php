@@ -42,7 +42,7 @@ class Arb
         if (getenv('GOOGLE_JSON_AUTH_FILE')) {
             $jsonAuth = $this->resourcesDir . '/' . getenv('GOOGLE_JSON_AUTH_FILE');
         } else {
-            $jsonAuth = getenv('GOOGLE_JSON_AUTH');
+            $jsonAuth = json_decode(getenv('GOOGLE_JSON_AUTH') ,true);
         }
 
         $google->setAuthConfig($jsonAuth);

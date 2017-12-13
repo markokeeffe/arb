@@ -264,12 +264,12 @@ class Arb {
         $newRow = new Google_Service_Sheets_ValueRange();
         $newRow->setValues(['values' => [
             date('Y-m-d H:i:s'),
-            $coinbasePrices['BTC'],
-            $coinbasePrices['ETH'],
-            $coinbasePrices['LTC'],
-            $btcMarketsPrices['BTC'],
-            $btcMarketsPrices['ETH'],
-            $btcMarketsPrices['LTC'],
+            round($coinbasePrices['BTC'], 2),
+            round($coinbasePrices['ETH'], 2),
+            round($coinbasePrices['LTC'], 2),
+            round($btcMarketsPrices['BTC'], 2),
+            round($btcMarketsPrices['ETH'], 2),
+            round($btcMarketsPrices['LTC'], 2),
             round($variances['BTC'], 2),
             round($variances['ETH'], 2),
             round($variances['LTC'], 2),

@@ -1,5 +1,5 @@
 <?php
-namespace App\BtcMarkets;
+namespace Arb\BtcMarkets;
 /*
 | BTCMarkets
 | Exchange is in AUD.

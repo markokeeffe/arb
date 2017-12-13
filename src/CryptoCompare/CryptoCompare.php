@@ -1,6 +1,6 @@
 <?php
 
-namespace App\CryptoCompare;
+namespace Arb\CryptoCompare;
 
 
 class CryptoCompare

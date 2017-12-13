@@ -9,6 +9,7 @@
     ],
     "minimum-stability": "dev",
     "require": {
+        "php": ">=5.4.0",
         "coinbase/coinbase": "^2.5",
         "vlucas/phpdotenv": "^2.4",
         "google/apiclient": "^2.2"

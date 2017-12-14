@@ -261,6 +261,7 @@ class Arb
     protected function appendToGoogleSheet($basePrices, $coinbasePrices, $btcMarketsPrices, $variances)
     {
         $spreadsheetId = getenv('GOOGLE_SHEET_ID');
+
         $range = 'A2:G2';
 
         $newRow = new Google_Service_Sheets_ValueRange();
@@ -290,5 +291,23 @@ class Arb
             'valueInputOption' => 'USER_ENTERED',
             'insertDataOption' => 'INSERT_ROWS',
         ]);
+
+        $requests = [
+            new \Google_Service_Sheets_Request([
+                'deleteDimension' => [
+                    'range' => [
+                        'dimension' => 'ROWS',
+                        'startIndex' => 1,
+                        'endIndex' => 2,
+                    ],
+                ]
+            ]),
+        ];
+        $batchUpdateRequest = new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
+            'requests' => $requests
+        ]);
+
+        // Update the sheet to delete the row
+        $this->googleSheets->spreadsheets->batchUpdate($spreadsheetId, $batchUpdateRequest);
     }
 }

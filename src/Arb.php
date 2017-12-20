@@ -20,6 +20,18 @@ class Arb
     protected $googleSheets;
     protected $buyAmount;
 
+    const COINS = [
+        'BTC',
+        'ETH',
+        'LTC',
+        'BCH',
+    ];
+    const CURRENCIES = [
+        'AUD',
+        'USD',
+        'GBP',
+    ];
+
     public function __construct($resourcesDir)
     {
         $this->resourcesDir = $resourcesDir;
@@ -58,31 +70,21 @@ class Arb
 
         echo 'Getting base prices from CryptoCompare...' . PHP_EOL;
 
-        $currencies = ['AUD', 'USD', 'GBP'];
+        $coins = self::COINS;
+        $currencies = self::CURRENCIES;
 
-        $basePrices = [
-            'BTC' => $this->cryptoCompare->prices('BTC', $currencies),
-            'ETH' => $this->cryptoCompare->prices('ETH', $currencies),
-            'LTC' => $this->cryptoCompare->prices('LTC', $currencies),
-        ];
+        // Collect base prices from CryptoCompare
+        $basePrices = [];
+        foreach ($coins as $coin) {
+            $basePrices[$coin] = $this->cryptoCompare->prices($coin, $currencies);
 
-        echo '    BTC: ';
-        echo 'AUD$' . $basePrices['BTC']['AUD'] . ' ';
-        echo 'USD$' . $basePrices['BTC']['USD'] . ' ';
-        echo 'GBP£' . $basePrices['BTC']['GBP'] . ' ';
-        echo PHP_EOL;
-
-        echo '    ETH: ';
-        echo 'AUD$' . $basePrices['ETH']['AUD'] . ' ';
-        echo 'USD$' . $basePrices['ETH']['USD'] . ' ';
-        echo 'GBP£' . $basePrices['ETH']['GBP'] . ' ';
-        echo PHP_EOL;
-
-        echo '    LTC: ';
-        echo 'AUD$' . $basePrices['LTC']['AUD'] . ' ';
-        echo 'USD$' . $basePrices['LTC']['USD'] . ' ';
-        echo 'GBP£' . $basePrices['LTC']['GBP'] . ' ';
-        echo PHP_EOL;
+            // Output the base price for this coin in each of the currencies
+            echo '    ' . $coin . ': ';
+            foreach ($currencies as $currency) {
+                echo $currency . $basePrices[$coin][$currency] . ' ';
+            }
+            echo PHP_EOL;
+        }
 
         /** @var \Coinbase\Wallet\Resource\ResourceCollection $paymentMethods */
         $paymentMethods = $this->coinbase->getPaymentMethods();
@@ -105,110 +107,52 @@ class Arb
 
         echo PHP_EOL;
 
-        echo 'Getting Coinbase BTC price...' . PHP_EOL;
+        $coinbaseBuyPrices = [];
+        foreach ($coins as $coin) {
+            $coinbaseBuyPrices[$coin] = $this->coinbase->getBuyPrice($coin . '-AUD')->getAmount();
+        }
 
-        /** @var \Coinbase\Wallet\Value\Money $btcPrice */
-        $btcPrice = $this->coinbase->getBuyPrice('BTC-AUD');
-
-        echo 'Getting Coinbase ETH price...' . PHP_EOL;
-
-        /** @var \Coinbase\Wallet\Value\Money $ethPrice */
-        $ethPrice = $this->coinbase->getBuyPrice('ETH-AUD');
-
-        echo 'Getting Coinbase LTC price...' . PHP_EOL;
-
-        /** @var \Coinbase\Wallet\Value\Money $ltcPrice */
-        $ltcPrice = $this->coinbase->getBuyPrice('LTC-AUD');
-
-        $coinbasePrices = [
-            'BTC' => (floatval($btcPrice->getAmount()) / 100) * (100 + $coinbaseCreditCardFee),
-            'ETH' => (floatval($ethPrice->getAmount()) / 100) * (100 + $coinbaseCreditCardFee),
-            'LTC' => (floatval($ltcPrice->getAmount()) / 100) * (100 + $coinbaseCreditCardFee),
-        ];
-
-        echo '    BTC: $' . $coinbasePrices['BTC'].PHP_EOL;
-        echo '    ETH: $' . $coinbasePrices['ETH'].PHP_EOL;
-        echo '    LTC: $' . $coinbasePrices['LTC'].PHP_EOL;
+        echo 'Coinbase Buy Prices (after fee):' . PHP_EOL;
+        $coinbasePricesAfterFee = [];
+        foreach ($coins as $coin) {
+            $coinbasePricesAfterFee[$coin] = (floatval($coinbaseBuyPrices[$coin]) / 100) * (100 + $coinbaseCreditCardFee);
+            echo '    ' . $coin . ': $' . $coinbasePricesAfterFee[$coin].PHP_EOL;
+        }
         echo PHP_EOL;
 
-        echo 'Getting BTCMarkets BTC price...' . PHP_EOL;
+        $btcMarketsSellPrices = [];
+        foreach ($coins as $coin) {
+            $btcMarketsSellPrices[$coin] = $this->btcMarkets->price($coin);
+        }
 
-        $btcPrice = $this->btcMarkets->price('BTC');
-
-        echo 'Getting BTCMarkets ETH price...' . PHP_EOL;
-
-        $ethPrice = $this->btcMarkets->price('ETH');
-
-        echo 'Getting BTCMarkets LTC price...' . PHP_EOL;
-
-        $ltcPrice = $this->btcMarkets->price('LTC');
-
-        $btcMarketsPrices = [
-            'BTC' => ($btcPrice['lastPrice'] / 100) * (100 - $btcMarketsTradingFee),
-            'ETH' => ($ethPrice['lastPrice'] / 100) * (100 - $btcMarketsTradingFee),
-            'LTC' => ($ltcPrice['lastPrice'] / 100) * (100 - $btcMarketsTradingFee),
-        ];
-
-        echo '    BTC: $' . $btcMarketsPrices['BTC'].PHP_EOL;
-        echo '    ETH: $' . $btcMarketsPrices['ETH'].PHP_EOL;
-        echo '    LTC: $' . $btcMarketsPrices['LTC'].PHP_EOL;
+        echo 'BTC Markets Sell Prices (after fee):' . PHP_EOL;
+        $btcMarketsSellPricesAfterFee = [];
+        foreach ($coins as $coin) {
+            $btcMarketsSellPricesAfterFee[$coin] = ($btcMarketsSellPrices[$coin]['lastPrice'] / 100) * (100 - $btcMarketsTradingFee);
+            echo '    ' . $coin . ': $' . $btcMarketsSellPricesAfterFee[$coin].PHP_EOL;
+        }
         echo PHP_EOL;
 
-        echo 'Calculating variances...' . PHP_EOL;
+        echo 'Variances:' . PHP_EOL;
 
-        $variances = [
-            'BTC' => (((100 / $coinbasePrices['BTC']) * $btcMarketsPrices['BTC']) - 100),
-            'ETH' => (((100 / $coinbasePrices['ETH']) * $btcMarketsPrices['ETH']) - 100),
-            'LTC' => (((100 / $coinbasePrices['LTC']) * $btcMarketsPrices['LTC']) - 100),
-        ];
+        $variances = [];
+        foreach ($coins as $coin) {
+            $variances[$coin] = (((100 / $coinbasePricesAfterFee[$coin]) * $btcMarketsSellPricesAfterFee[$coin]) - 100);
+            echo '    ' .$coin . ': ' . $variances[$coin] . '%' . PHP_EOL;
+        }
+        echo PHP_EOL;
 
         $maxVariance = max($variances);
 
-        echo '    BTC: ' . $variances['BTC'] . '%' . PHP_EOL;
-        echo '    ETH: ' . $variances['ETH'] . '%' . PHP_EOL;
-        echo '    LTC: ' . $variances['LTC'] . '%' . PHP_EOL;
-
-        echo PHP_EOL;
-
-        $buyBtc = $buyAmountAfterFee / $coinbasePrices['BTC'];
-
-        echo 'Can Buy BTC: ' . $buyBtc . PHP_EOL;
-
-        $buyEth = $buyAmountAfterFee / $coinbasePrices['ETH'];
-
-        echo 'Can Buy ETH: ' . $buyEth . PHP_EOL;
-
-        $buyLtc = $buyAmountAfterFee / $coinbasePrices['LTC'];
-
-        echo 'Can Buy LTC: ' . $buyLtc . PHP_EOL;
-
-        $btcExpected = ($buyBtc / 100 * (100 + $variances['BTC'])) - $buyBtc;
-        $ethExpected = ($buyEth / 100 * (100 + $variances['ETH'])) - $buyEth;
-        $ltcExpected = ($buyLtc / 100 * (100 + $variances['LTC'])) - $buyLtc;
-
-        $profits = [
-            'BTC' => round($btcExpected * $btcMarketsPrices['BTC'], 2),
-            'ETH' => round($ethExpected * $btcMarketsPrices['ETH'], 2),
-            'LTC' => round($ltcExpected * $btcMarketsPrices['LTC'], 2),
-        ];
-
-        $maxProfit = max($profits);
-
-        echo PHP_EOL;
-
-        echo 'Expected BTC Profit: $' . $profits['BTC'] . PHP_EOL;
-        echo 'Expected ETH Profit: $' . $profits['ETH'] . PHP_EOL;
-        echo 'Expected LTC Profit: $' . $profits['LTC'] . PHP_EOL;
 
         echo '=========================================' . PHP_EOL . PHP_EOL;
 
         // Show an OSX notification if enabled
         if (getenv('NOTIFICATION_ENABLED') && getenv('NOTIFICATION_THRESHOLD') < $maxVariance) {
             $title = 'ARB: Can buy $' . round($this->buyAmount, 2) . '\n';
-            $subtitle = 'Max Profit: $' . $maxProfit . ' (' . array_search($maxProfit, $profits) . ')';
             $notification = 'Max Variance: ' . $maxVariance . ' (' . array_search($maxVariance, $variances) . ')';
 
-            exec('osascript -e \'display notification "' . $notification . '" with title "' . $title . '" subtitle "' . $subtitle . '"\'');
+            exec('osascript -e \'display notification "' . $notification . '" with title "' . $title . '"\'');
         }
 
         // Send a push if the variance is high
@@ -218,7 +162,7 @@ class Arb
 
         // Append data to a google sheet if enabled
         if (getenv('APPEND_TO_GOOGLE_SHEET') && getenv('GOOGLE_SHEET_ID')) {
-            $this->appendToGoogleSheet($basePrices, $coinbasePrices, $btcMarketsPrices, $variances);
+            $this->appendToGoogleSheet($basePrices, $coinbasePricesAfterFee, $btcMarketsSellPricesAfterFee, $variances);
         }
     }
 
@@ -235,6 +179,10 @@ class Arb
      */
     protected function sendPushNotification(array $variances)
     {
+        $notificationParts = [];
+        foreach (self::COINS as $coin) {
+            $notificationParts[] = $coin . ':' . round($variances[$coin], 2) . '%';
+        }
         curl_setopt_array($ch = curl_init(), [
             CURLOPT_URL => "https://api.pushed.co/1/push",
             CURLOPT_CUSTOMREQUEST => "POST",
@@ -242,7 +190,7 @@ class Arb
                 "app_key" => getenv('PUSHED_APP_KEY'),
                 "app_secret" => getenv('PUSHED_APP_SECRET'),
                 "target_type" => "app",
-                "content" => 'BTC: ' . round($variances['BTC'], 2) . '%  ETH: ' . round($variances['ETH'], 2) . '%  LTC: ' . round($variances['LTC'], 2) . '%',
+                "content" => implode('  ', $notificationParts),
             ],
             CURLOPT_SAFE_UPLOAD => true,
             CURLOPT_RETURNTRANSFER => true
@@ -260,32 +208,37 @@ class Arb
      */
     protected function appendToGoogleSheet($basePrices, $coinbasePrices, $btcMarketsPrices, $variances)
     {
+        $coins = self::COINS;
+        $currencies = self::CURRENCIES;
+
         $spreadsheetId = getenv('GOOGLE_SHEET_ID');
 
         $range = 'A2:G2';
 
-        $newRow = new Google_Service_Sheets_ValueRange();
-        $newRow->setValues(['values' => [
+        $rowValues = [
             date('Y-m-d H:i:s'),
-            round($coinbasePrices['BTC'], 2),
-            round($coinbasePrices['ETH'], 2),
-            round($coinbasePrices['LTC'], 2),
-            round($btcMarketsPrices['BTC'], 2),
-            round($btcMarketsPrices['ETH'], 2),
-            round($btcMarketsPrices['LTC'], 2),
-            round($variances['BTC'], 2),
-            round($variances['ETH'], 2),
-            round($variances['LTC'], 2),
-            $basePrices['BTC']['AUD'],
-            $basePrices['BTC']['USD'],
-            $basePrices['BTC']['GBP'],
-            $basePrices['ETH']['AUD'],
-            $basePrices['ETH']['USD'],
-            $basePrices['ETH']['GBP'],
-            $basePrices['LTC']['AUD'],
-            $basePrices['LTC']['USD'],
-            $basePrices['LTC']['GBP'],
-        ]]);
+        ];
+        // Add Coinbase prices
+        foreach ($coins as $coin) {
+            $rowValues[] = round($coinbasePrices[$coin], 2);
+        }
+        // Add BTC Markets prices
+        foreach ($coins as $coin) {
+            $rowValues[] = round($btcMarketsPrices[$coin], 2);
+        }
+        // Add variances
+        foreach ($coins as $coin) {
+            $rowValues[] = round($variances[$coin], 2);
+        }
+        // Add base prices
+        foreach ($coins as $coin) {
+            foreach ($currencies as $currency) {
+                $rowValues[] = $basePrices[$coin][$currency];
+            }
+        }
+
+        $newRow = new Google_Service_Sheets_ValueRange();
+        $newRow->setValues(['values' => $rowValues]);
 
         $this->googleSheets->spreadsheets_values->append($spreadsheetId, $range, $newRow, [
             'valueInputOption' => 'USER_ENTERED',

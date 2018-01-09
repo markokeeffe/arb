@@ -156,7 +156,7 @@ class Arb
         }
 
         // Send a push if the variance is high
-        if (getenv('PUSH_ENABLED') && getenv('PUSH_THRESHOLD') < $maxVariance && getenv('PUSHED_APP_KEY') && getenv('PUSHED_APP_SECRET')) {
+        if (getenv('PUSH_ENABLED') && getenv('PUSH_THRESHOLD') < $maxVariance && getenv('PUSHED_APP_KEY') && getenv('PUSHED_APP_SECRET') && $buyAmountAfterFee >= getenv('BUY_AMOUNT_THRESHOLD')) {
             $this->sendPushNotification($variances);
         }
 
